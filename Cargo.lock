@@ -56,17 +56,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "async-trait"
-version = "0.1.52"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "061a7acccaa286c011ddc30970520b98fa40e00c9d644633fb26b5fc63a265e3"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -360,22 +349,22 @@ dependencies = [
 
 [[package]]
 name = "embedded-hal"
-version = "1.0.0-alpha.6"
+version = "1.0.0-alpha.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "570e765da7319a256dfe1542f14501a53f74e020b68aa666a98b1ad31a614c7e"
+checksum = "93cc714edeae73aa1ff259af4498595360b2992e0e9c59801873ed198a7f2216"
 dependencies = [
  "nb 1.0.0",
 ]
 
 [[package]]
 name = "embedded-svc"
-version = "0.16.8"
+version = "0.17.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c79521c3b999f78d40cdd0ac6493ee4f8288ecbc52a64dc92f6fbde63aac4af6"
+checksum = "05c48233b3ee40531e58274da19678eddfa51ad0ccc097d8cb06a6d93e629113"
 dependencies = [
  "anyhow",
- "async-trait",
  "enumset",
+ "futures",
  "http-auth-basic",
  "log",
  "no-std-net",
@@ -450,13 +439,13 @@ dependencies = [
 
 [[package]]
 name = "esp-idf-hal"
-version = "0.32.10"
+version = "0.33.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d203d5f6bc6d2335f7ea82b8c932c8f00c31fd7c4fb5d9db570350af02ad8832"
+checksum = "4c6668cffb44ffe9b1a5d70c788ed7af64f2fb3a22158e29f30aa3c350dda352"
 dependencies = [
  "anyhow",
  "embedded-hal 0.2.7",
- "embedded-hal 1.0.0-alpha.6",
+ "embedded-hal 1.0.0-alpha.7",
  "embedded-svc",
  "embuild",
  "esp-idf-sys",
@@ -465,8 +454,8 @@ dependencies = [
 
 [[package]]
 name = "esp-idf-svc"
-version = "0.36.10"
-source = "git+https://github.com/galenguyer/esp-idf-svc?branch=mac#2493c5b0b43c132377de3a6312dc699977b38d47"
+version = "0.37.2"
+source = "git+https://github.com/esp-rs/esp-idf-svc?rev=a741662c#a741662cdf2fd9210e5a063dfe196fb6f9b8e9cf"
 dependencies = [
  "anyhow",
  "cstr_core",
@@ -835,7 +824,7 @@ checksum = "308cc39be01b73d0d18f82a0e7b2a3df85245f84af96fdddc5d202d27e47b86a"
 
 [[package]]
 name = "mercury"
-version = "0.1.0"
+version = "1.1.1"
 dependencies = [
  "anyhow",
  "embedded-hal 0.2.7",
