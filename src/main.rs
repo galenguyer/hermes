@@ -1,12 +1,11 @@
+use chrono::{TimeZone, Utc};
 use mercury::Message;
 use paho_mqtt as mqtt;
+use rinfluxdb::line_protocol::blocking::Client;
+use rinfluxdb::line_protocol::LineBuilder;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-struct Source {
-    author: String,
-    location: String,
-}
 
 fn main() {
     let mut client = match mqtt::Client::new(
@@ -36,6 +35,14 @@ fn main() {
         panic!("Unable to subscribe:\n\t{}", e);
     }
 
+    let influx_client = Client::new(
+        url::Url::parse("http://mercury.student.rit.edu:8086").unwrap(),
+        {
+            let credentials: Option<(String, String)> = None;
+            credentials
+        },
+    ).unwrap();
+
     let msgs: Arc<Mutex<Vec<Message>>> = Arc::new(Mutex::new(Vec::new()));
 
     let t_msgs = Arc::clone(&msgs);
@@ -45,12 +52,18 @@ fn main() {
         thread::sleep(Duration::from_secs(15));
     });
 
-    for msg in reciever.iter() {
-        if let Some(message) = msg {
-            let data: Message = serde_json::from_str(&message.payload_str()).unwrap();
-            println!("{:?}", data.clone());
-            (*msgs.lock().unwrap()).push(data);
-        }
+    for msg in reciever.iter().flatten() {
+        let data: Message = serde_json::from_str(&msg.payload_str()).unwrap();
+        println!("{:#?}", &data);
+        let line = LineBuilder::new("temperature")
+            .insert_field("temperature_f", data.temperature_f as f64)
+            .insert_field("temperature_c", data.temperature_c as f64)
+            .insert_tag("author", data.author.to_string())
+            .set_timestamp(Utc.timestamp(data.timestamp.try_into().unwrap(), 0))
+            .build();
+        influx_client.send("mercury", &[line]).unwrap();
+
+        (*msgs.lock().unwrap()).push(data);
     }
     thread.join().unwrap();
 }

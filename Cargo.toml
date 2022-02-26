@@ -6,9 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+chrono = "0.4.19"
 #mercury = { git = "https://github.com/galenguyer/mercury" }
 mercury = { path = "../mercury" }
 paho-mqtt = "0.10.0"
+rinfluxdb = { version = "0.2.0", features = ["client"] }
 serde_json = "1.0.79"
+url = "2.2.2"
 
 [features]
