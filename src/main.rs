@@ -41,7 +41,8 @@ fn main() {
             let credentials: Option<(String, String)> = None;
             credentials
         },
-    ).unwrap();
+    )
+    .unwrap();
 
     let msgs: Arc<Mutex<Vec<Message>>> = Arc::new(Mutex::new(Vec::new()));
 
@@ -53,17 +54,23 @@ fn main() {
     });
 
     for msg in reciever.iter().flatten() {
-        let data: Message = serde_json::from_str(&msg.payload_str()).unwrap();
-        println!("{:#?}", &data);
-        let line = LineBuilder::new("temperature")
-            .insert_field("temperature_f", data.temperature_f as f64)
-            .insert_field("temperature_c", data.temperature_c as f64)
-            .insert_tag("author", data.author.to_string())
-            .set_timestamp(Utc.timestamp(data.timestamp.try_into().unwrap(), 0))
-            .build();
-        influx_client.send("mercury", &[line]).unwrap();
+        match serde_json::from_str::<Message>(&msg.payload_str()) {
+            Ok(data) => {
+                println!("{:#?}", &data);
+                let line = LineBuilder::new("temperature")
+                    .insert_field("temperature_f", data.temperature_f as f64)
+                    .insert_field("temperature_c", data.temperature_c as f64)
+                    .insert_tag("author", data.author.to_string())
+                    .set_timestamp(Utc.timestamp(data.timestamp.try_into().unwrap(), 0))
+                    .build();
+                if let Err(e) = influx_client.send("mercury", &[line]) {
+                    println!("Error inserting into InfluxDB: {}", e);
+                }
 
-        (*msgs.lock().unwrap()).push(data);
+                (*msgs.lock().unwrap()).push(data);
+            }
+            Err(e) => println!("Error deserializing message: {}", e),
+        }
     }
     thread.join().unwrap();
 }
