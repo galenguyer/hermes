@@ -1,8 +1,7 @@
-use chrono::{TimeZone, Utc};
+use futures::executor::block_on;
+use influxrs;
 use mercury::Message;
 use paho_mqtt as mqtt;
-use rinfluxdb::line_protocol::blocking::Client;
-use rinfluxdb::line_protocol::LineBuilder;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -35,14 +34,11 @@ fn main() {
         panic!("Unable to subscribe:\n\t{}", e);
     }
 
-    let influx_client = Client::new(
-        url::Url::parse("http://mercury.student.rit.edu:8086").unwrap(),
-        {
-            let credentials: Option<(String, String)> = None;
-            credentials
-        },
-    )
-    .unwrap();
+    let influx_client = influxrs::InfluxClient::builder(
+        std::env::var("INFLUX_URL").unwrap(),
+        std::env::var("INFLUX_KEY").unwrap(),
+        std::env::var("INFLUX_ORG").unwrap(),
+    ).build().unwrap();
 
     let msgs: Arc<Mutex<Vec<Message>>> = Arc::new(Mutex::new(Vec::new()));
 
@@ -57,13 +53,15 @@ fn main() {
         match serde_json::from_str::<Message>(&msg.payload_str()) {
             Ok(data) => {
                 println!("{:#?}", &data);
-                let line = LineBuilder::new("temperature")
-                    .insert_field("temperature_f", data.temperature_f as f64)
-                    .insert_field("temperature_c", data.temperature_c as f64)
-                    .insert_tag("author", data.author.to_string())
-                    .set_timestamp(Utc.timestamp(data.timestamp.try_into().unwrap(), 0))
-                    .build();
-                if let Err(e) = influx_client.send("mercury", &[line]) {
+                let measurement = influxrs::Measurement::builder("temperature")
+                    .field("temperature_f", data.temperature_f)
+                    .field("temperature_c", data.temperature_c)
+                    .tag("author", data.author.to_string())
+                    .timestamp_ms((data.timestamp * 1000).into())
+                    .build()
+                    .unwrap();
+
+                if let Err(e) = block_on(influx_client.write("mercury", &[measurement])) {
                     println!("Error inserting into InfluxDB: {}", e);
                 }
 

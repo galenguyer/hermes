@@ -1,3 +1,3 @@
 # hermes
 
-Build deps: `cmake`
+Build deps: `cmake libssl-dev pkg-config`
