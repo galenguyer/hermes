@@ -9,7 +9,7 @@ use std::{env, thread};
 fn main() {
     let mut client = match mqtt::Client::new(
         mqtt::CreateOptionsBuilder::new()
-            .server_uri("tcp://mercury.student.rit.edu")
+            .server_uri(env::var("MQTT_BROKER_URI").unwrap())
             .client_id("hermes")
             .finalize(),
     ) {
