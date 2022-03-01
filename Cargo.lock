@@ -1012,6 +1012,7 @@ checksum = "308cc39be01b73d0d18f82a0e7b2a3df85245f84af96fdddc5d202d27e47b86a"
 [[package]]
 name = "mercury"
 version = "1.1.1"
+source = "git+https://github.com/galenguyer/mercury#e8ae8bbff98bd1579eebae2a37ec0220f987a207"
 dependencies = [
  "anyhow",
  "embedded-hal 0.2.7",
