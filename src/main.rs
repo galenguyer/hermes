@@ -1,5 +1,5 @@
 use futures::executor::block_on;
-use influxrs;
+use influxrs::{self, Measurement};
 use mercury::Message;
 use paho_mqtt as mqtt;
 use std::sync::{Arc, Mutex};
@@ -50,10 +50,10 @@ fn main() {
 
         println!("Messaged queued: {}", (*t_msgs.lock().unwrap()).len());
 
-        let lines: Vec<influxrs::Measurement> = (*t_msgs.lock().unwrap())
+        let lines: Vec<Measurement> = (*t_msgs.lock().unwrap())
             .iter()
             .map(|m| {
-                influxrs::Measurement::builder("temperature")
+                Measurement::builder("temperature")
                     .field("temperature_f", m.temperature_f)
                     .field("temperature_c", m.temperature_c)
                     .tag("author", m.author.to_string())
